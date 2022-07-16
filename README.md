@@ -2,9 +2,9 @@
 
 <p align="center">
 
-  <img width="50%" src="https://github-readme-stats.vercel.app/api?username=mzaksana&theme=default&show_icons=true&count_private=true" />
+  <img width="50%" style="color: red" src="https://github-readme-stats.vercel.app/api?username=mzaksana&theme=default&show_icons=true&count_private=true&&hide_border=true&hide_title=true" />
 
-  <img width="42%" src="https://github-readme-streak-stats.herokuapp.com?user=mzaksana&hide_border=false" />
+  <img width="42%" src="https://github-readme-streak-stats.herokuapp.com?user=mzaksana&hide_border=true" />
 
 </p>
 
