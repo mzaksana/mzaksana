@@ -1,8 +1,12 @@
 ### Hi there 👋
 
-![Github stats](https://github-readme-stats.vercel.app/api?username=mzaksana&theme=default&show_icons=true&count_private=true)
+<p align="center">
 
-![Github stats](https://github-readme-streak-stats.herokuapp.com?user=mzaksana&hide_border=true)
+  <img width="50%" src="https://github-readme-stats.vercel.app/api?username=mzaksana&theme=default&show_icons=true&count_private=true" />
+
+  <img width="42%" src="https://github-readme-streak-stats.herokuapp.com?user=mzaksana&hide_border=false" />
+
+</p>
 
 <!--
 **mzaksana/mzaksana** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
