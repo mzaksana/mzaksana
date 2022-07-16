@@ -2,13 +2,7 @@
 
 ![Github stats](https://github-readme-stats.vercel.app/api?username=mzaksana&theme=default&show_icons=true&count_private=true)
 
-<p align="center">
-
-  <img width="50%" src=https://github-readme-stats.vercel.app/api username=mzaksana&count_private=true&show_icons=true&include_all_commits=true&hide_border=true&hide_title=true />
-
-  <img width="42%" src="https://github-readme-streak-stats.herokuapp.com?user=mzaksana&hide_border=true" />
-
-</p>
+![Github stats](https://github-readme-streak-stats.herokuapp.com?user=mzaksana&hide_border=true)
 
 <!--
 **mzaksana/mzaksana** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
