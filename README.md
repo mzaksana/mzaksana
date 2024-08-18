@@ -1,7 +1,7 @@
 ### Hi there 👋
 
   <p align="left">
-    <img width="25%" src="https://github-readme-streak-stats.herokuapp.com?user=mzaksana&hide_border=false" />
+    <img width="45%" src="https://github-readme-streak-stats.herokuapp.com?user=mzaksana&hide_border=false" />
   </p>
  
   <img width="75%" src="https://github.com/mzaksana/mzaksana/blob/main/profile-3d-contrib/profile-green-animate.svg" />
