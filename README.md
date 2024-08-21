@@ -2,7 +2,7 @@
 
 <p align="center">
    <img width="55.2%"
-      src="https://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=mzaksana&theme=default"
+      src="https://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=mzaksana&theme=github"
       alt="Zane's GitHub Stats" />
    <img width="40%" src="https://github-readme-streak-stats.herokuapp.com?user=mzaksana&hide_border=false" />
 </p>
