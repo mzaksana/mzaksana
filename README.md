@@ -2,11 +2,6 @@
 
 <div style="background-color:red" fill="red" >
 
-   <p align="right">
-      <img width="16%"
-         src="https://visitcount.itsvg.in/api?id=mzaksana&label=Profile%20Views&color=8&icon=5&pretty=true" />
-   </p>
-
    
   <!-- <p align="left">
       <img width="55.2%"
