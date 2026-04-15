@@ -19,6 +19,7 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
 
           path = Path("profile-3d-contrib/profile-green-animate.svg")
           if not path.exists():
@@ -31,15 +32,13 @@ jobs:
           if start == -1:
               raise SystemExit("Pie chart group not found")
 
-          import re
-
           tag_end = text.find(">", start)
           if tag_end == -1:
               raise SystemExit("Malformed <g> tag in SVG")
 
           idx = tag_end + 1
           depth = 1
-          open_re = re.compile(r"<g(?=\\s|>)")
+          open_re = re.compile(r"<g(?=\s|>)")
           close_re = re.compile(r"</g>")
           while idx < len(text):
               open_match = open_re.search(text, idx)
