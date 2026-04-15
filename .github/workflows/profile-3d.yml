@@ -31,29 +31,39 @@ jobs:
           if start == -1:
               raise SystemExit("Pie chart group not found")
 
+          import re
+
           tag_end = text.find(">", start)
           if tag_end == -1:
               raise SystemExit("Malformed <g> tag in SVG")
 
           idx = tag_end + 1
           depth = 1
+          open_re = re.compile(r"<g(?=\\s|>)")
+          close_re = re.compile(r"</g>")
           while idx < len(text):
-              if text.startswith("<g>", idx) or text.startswith("<g ", idx):
-                  depth += 1
-                  tag_end = text.find(">", idx)
+              open_match = open_re.search(text, idx)
+              close_match = close_re.search(text, idx)
+              if close_match is None:
+                  raise SystemExit("Could not find closing </g> tag for pie chart group")
+
+              if open_match and open_match.start() < close_match.start():
+                  tag_end = text.find(">", open_match.start())
                   if tag_end == -1:
                       raise SystemExit("Malformed <g> tag in SVG")
+                  is_self_closing = text[tag_end - 1] == "/"
+                  if not is_self_closing:
+                      depth += 1
                   idx = tag_end + 1
-              elif text.startswith("</g>", idx):
-                  depth -= 1
-                  idx += 4
-                  if depth == 0:
-                      end = idx
-                      break
-              else:
-                  idx += 1
+                  continue
+
+              depth -= 1
+              idx = close_match.end()
+              if depth == 0:
+                  end = idx
+                  break
           else:
-              raise SystemExit("Unbalanced <g> tags in SVG")
+              raise SystemExit("Could not find closing </g> tag for pie chart group")
 
           path.write_text(text[:start] + text[end:])
           PY
