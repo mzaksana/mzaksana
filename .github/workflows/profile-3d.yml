@@ -33,9 +33,12 @@ jobs:
           idx = start
           depth = 0
           while idx < len(text):
-              if text.startswith("<g", idx):
+              if text.startswith("<g>", idx) or text.startswith("<g ", idx):
                   depth += 1
-                  idx = text.find(">", idx) + 1
+                  tag_end = text.find(">", idx)
+                  if tag_end == -1:
+                      raise SystemExit("Malformed <g> tag in SVG")
+                  idx = tag_end + 1
               elif text.startswith("</g>", idx):
                   depth -= 1
                   idx += 4
