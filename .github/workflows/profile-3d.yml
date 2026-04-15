@@ -16,25 +16,24 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
       - name: Remove language pie chart from profile SVG
+        env:
+          PROFILE_SVG: profile-3d-contrib/profile-green-animate.svg
+          PIE_ANCHOR: translate(40, 520)
         run: |
           python - <<'PY'
           from pathlib import Path
           import os
           import re
 
-          svg_path = Path(
-              os.environ.get(
-                  "PROFILE_SVG", "profile-3d-contrib/profile-green-animate.svg"
-              )
-          )
+          svg_path = Path(os.environ.get("PROFILE_SVG", "profile-3d-contrib/profile-green-animate.svg"))
           if not svg_path.exists():
               raise SystemExit(f"Missing SVG: {svg_path}")
 
           text = svg_path.read_text()
           # The pie chart group is anchored at this transform in the current layout.
-          pie_anchor = "translate(40, 520)"
+          pie_anchor = os.environ.get("PIE_ANCHOR", "translate(40, 520)")
           needle = f'<g transform="{pie_anchor}">'
-          open_re = re.compile(r"<g(?=\s|>)")
+          open_re = re.compile(r"<g(?=[\s/>])")
           close_re = re.compile(r"</g>")
           start = text.find(needle)
           if start == -1:
