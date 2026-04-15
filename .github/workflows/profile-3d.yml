@@ -15,6 +15,70 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
+      - name: Remove language pie chart from profile SVG
+        env:
+          PROFILE_SVG: profile-3d-contrib/profile-green-animate.svg
+          PIE_ANCHOR: translate(40, 520)
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import os
+          import re
+
+          svg_path = Path(os.environ["PROFILE_SVG"])
+          if not svg_path.exists():
+              raise SystemExit(f"Missing SVG: {svg_path}")
+
+          text = svg_path.read_text()
+          # The pie chart group is anchored at this transform in the current layout.
+          pie_anchor = os.environ["PIE_ANCHOR"]
+          needle = f'<g transform="{pie_anchor}">'
+          open_re = re.compile(r"<g\b")
+          close_re = re.compile(r"</g>")
+          start = text.find(needle)
+          if start == -1:
+              raise SystemExit(
+                  f"Pie chart group not found with anchor: {pie_anchor}"
+              )
+
+          tag_end = text.find(">", start)
+          if tag_end == -1:
+              raise SystemExit("Malformed <g> tag in SVG")
+
+          idx = tag_end + 1
+          depth = 1
+          end = None
+          while idx < len(text):
+              open_match = open_re.search(text, idx)
+              close_match = close_re.search(text, idx)
+              if close_match is None:
+                  raise SystemExit(
+                      "Unexpected end of file while searching for closing </g> tag for pie chart group"
+                  )
+
+              if open_match is not None and open_match.start() < close_match.start():
+                  tag_end = text.find(">", open_match.start())
+                  if tag_end == -1:
+                      raise SystemExit("Malformed <g> tag in SVG")
+                  tag_text = text[open_match.start() : tag_end + 1]
+                  is_self_closing = tag_text.rstrip().endswith("/>")
+                  if not is_self_closing:
+                      depth += 1
+                  idx = tag_end + 1
+                  continue
+
+              depth -= 1
+              idx = close_match.end()
+              if depth == 0:
+                  end = idx
+                  break
+          if end is None:
+              raise SystemExit(
+                  "Could not find matching closing </g> tag for pie chart group"
+              )
+
+          svg_path.write_text(text[:start] + text[end:])
+          PY
       - name: Commit & Push
         run: |
           git config user.name github-actions
