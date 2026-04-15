@@ -56,7 +56,7 @@ jobs:
                       "Unexpected end of file while searching for closing </g> tag for pie chart group"
                   )
 
-              if open_match and open_match.start() < close_match.start():
+              if open_match is not None and open_match.start() < close_match.start():
                   tag_end = text.find(">", open_match.start())
                   if tag_end == -1:
                       raise SystemExit("Malformed <g> tag in SVG")
