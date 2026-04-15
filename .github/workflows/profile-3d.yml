@@ -28,6 +28,8 @@ jobs:
           text = path.read_text()
           # The pie chart group is anchored at translate(40, 520) in the default layout.
           needle = '<g transform="translate(40, 520)">'
+          open_re = re.compile(r"<g(?=\s|>)")
+          close_re = re.compile(r"</g>")
           start = text.find(needle)
           if start == -1:
               raise SystemExit("Pie chart group not found")
@@ -38,8 +40,6 @@ jobs:
 
           idx = tag_end + 1
           depth = 1
-          open_re = re.compile(r"<g(?=\s|>)")
-          close_re = re.compile(r"</g>")
           while idx < len(text):
               open_match = open_re.search(text, idx)
               close_match = close_re.search(text, idx)
@@ -50,7 +50,8 @@ jobs:
                   tag_end = text.find(">", open_match.start())
                   if tag_end == -1:
                       raise SystemExit("Malformed <g> tag in SVG")
-                  is_self_closing = text[tag_end - 1] == "/"
+                  tag_text = text[open_match.start() : tag_end + 1]
+                  is_self_closing = tag_text.rstrip().endswith("/>")
                   if not is_self_closing:
                       depth += 1
                   idx = tag_end + 1
@@ -61,8 +62,6 @@ jobs:
               if depth == 0:
                   end = idx
                   break
-          else:
-              raise SystemExit("Could not find closing </g> tag for pie chart group")
 
           path.write_text(text[:start] + text[end:])
           PY
