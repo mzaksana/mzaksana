@@ -15,6 +15,40 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
+      - name: Remove language pie chart from profile SVG
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("profile-3d-contrib/profile-green-animate.svg")
+          if not path.exists():
+              raise SystemExit(f"Missing SVG: {path}")
+
+          text = path.read_text()
+          needle = '<g transform="translate(40, 520)">'
+          start = text.find(needle)
+          if start == -1:
+              raise SystemExit("Pie chart group not found")
+
+          idx = start
+          depth = 0
+          while idx < len(text):
+              if text.startswith("<g", idx):
+                  depth += 1
+                  idx = text.find(">", idx) + 1
+              elif text.startswith("</g>", idx):
+                  depth -= 1
+                  idx += 4
+                  if depth == 0:
+                      end = idx
+                      break
+              else:
+                  idx += 1
+          else:
+              raise SystemExit("Unbalanced <g> tags in SVG")
+
+          path.write_text(text[:start] + text[end:])
+          PY
       - name: Commit & Push
         run: |
           git config user.name github-actions
