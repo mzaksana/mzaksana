@@ -25,13 +25,18 @@ jobs:
               raise SystemExit(f"Missing SVG: {path}")
 
           text = path.read_text()
+          # The pie chart group is anchored at translate(40, 520) in the default layout.
           needle = '<g transform="translate(40, 520)">'
           start = text.find(needle)
           if start == -1:
               raise SystemExit("Pie chart group not found")
 
-          idx = start
-          depth = 0
+          tag_end = text.find(">", start)
+          if tag_end == -1:
+              raise SystemExit("Malformed <g> tag in SVG")
+
+          idx = tag_end + 1
+          depth = 1
           while idx < len(text):
               if text.startswith("<g>", idx) or text.startswith("<g ", idx):
                   depth += 1
