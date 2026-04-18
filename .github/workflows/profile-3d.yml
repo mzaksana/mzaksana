@@ -9,6 +9,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     name: generate-github-profile-3d-contrib
+    env:
+      TZ: Asia/Jakarta
     steps:
       - uses: actions/checkout@v3
       - uses: mzaksana/github-profile-3d-contrib@v1.0.0
