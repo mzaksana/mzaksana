@@ -126,6 +126,7 @@ const crease = (a, b) => a.d[0] * b.d[0] + a.d[1] * b.d[1] < CREASE;
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 const month = date => MONTHS[+date.slice(5, 7) - 1];
 const fmt = n => n.toLocaleString('en-US');
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const FONT = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
 
 // Animation timeline (seconds). Everything uses begin=0 + keyTimes, and the static attributes
@@ -218,7 +219,7 @@ function render(theme, name) {
 
   // Text printed flat on a surface at height z (reads along +x, lines stack along +y)
   const print = (x, y, z, str, size, color, extra = '') =>
-    plane(z, `<text x="${f(x)}" y="${f(y)}" font-size="${size}" fill="${color}"${extra}>${str}</text>`);
+    plane(z, `<text x="${f(x)}" y="${f(y)}" font-size="${size}" fill="${color}"${extra}>${esc(str)}</text>`);
 
   // Number that counts up to its final value (discrete frames; the last frame is the static one)
   function countUp(x, y, z, value, size, color, start, extra = '') {
@@ -285,7 +286,7 @@ function render(theme, name) {
       if (hi.length) rows.hi.push([by, hi]);
     }
     const textRows = list => list.map(([by, gs]) =>
-      `<text y="${by}" x="${gs.map(g => g[0]).join(' ')}">${gs.map(g => g[1]).join('')}</text>`).join('');
+      `<text y="${by}" x="${gs.map(g => g[0]).join(' ')}">${esc(gs.map(g => g[1]).join(''))}</text>`).join('');
     // Frame fr is fully visible at fr/FRAMES of the cycle and crossfades into the next one
     const vals = Array.from({ length: FRAMES + 1 }, (_, i) => (i % FRAMES === fr ? 1 : 0)).join(';');
     const keys = Array.from({ length: FRAMES + 1 }, (_, i) => f(i / FRAMES * 1000) / 1000).join(';');
