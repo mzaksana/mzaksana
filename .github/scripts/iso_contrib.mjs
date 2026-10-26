@@ -126,6 +126,19 @@ function edgesOf(pts, isOuter) {
 }
 const crease = (a, b) => a.d[0] * b.d[0] + a.d[1] * b.d[1] < CREASE;
 
+// Convex hull (monotone chain) of screen points
+function hull(pts) {
+  pts = [...pts].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const half = list => list.reduce((h, p) => {
+    while (h.length >= 2 && cross(h[h.length - 2], h[h.length - 1], p) <= 0) h.pop();
+    h.push(p);
+    return h;
+  }, []);
+  const lower = half(pts), upper = half([...pts].reverse());
+  return [...lower.slice(0, -1), ...upper.slice(0, -1)];
+}
+
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 const month = date => MONTHS[+date.slice(5, 7) - 1];
 const fmt = n => n.toLocaleString('en-US');
@@ -198,6 +211,19 @@ function render(theme, name) {
   }
 
   const flat = (pts, z, color) => fillPath(loopD([pts], z), color);
+
+  // Front edge of a footprint at height z (the line where a solid meets the surface below it)
+  function baseInk(outer, z) {
+    const edges = edgesOf(dedupe(outer), true), n = edges.length, start = Math.max(edges.findIndex(e => !e.front), 0);
+    let d = '', open = false;
+    for (let k = 0; k < n; k++) {
+      const e = edges[(start + k) % n];
+      if (!e.front) { open = false; continue; }
+      if (!open) { d += `M${pt(T(e.p, z))}`; open = true; }
+      d += `L${pt(T(e.q, z))}`;
+    }
+    inkPath(d);
+  }
 
   // Contents seen through an opening at height z: clip, draw, re-ink the rim
   function inside(opening, z, body) {
@@ -400,18 +426,26 @@ function render(theme, name) {
           return;
         }
         const h = height(c.count), top = B + h, s = dropStart(c.week) + c.wd * 0.02;
-        // Block drops onto its plate and fades in
-        const k = kt(0, s / BUILD, (s + 0.45) / BUILD, 1);
-        out.push(`<g><animate attributeName="opacity" values="0;0;1;1" keyTimes="${k}" dur="${BUILD}s"/>` +
-          `<animateTransform attributeName="transform" type="translate" values="0 -60;0 -60;0 0;0 0" keyTimes="${k}" calcMode="spline" keySplines="0 0 1 1;0.3 0.6 0.4 1;0 0 1 1" dur="${BUILD}s"/>`);
+        const foot = c === busiest ? rrect(x - 3, y - 3, x + BLOCK + 3, y + BLOCK + 3, 8) : rrect(x, y, x + BLOCK, y + BLOCK, 7, 3);
+        // Block grows from zero height: the finished block starts sunk into the plate and slides up,
+        // clipped to its own column above the plate, so walls, ink and caps stay exact every frame.
+        // Clip = the block's own silhouette grown by just the ink half-width, so the sunk part never
+        // shows below the plate line and the finished block is untouched
+        const id = `${name}-g${clipId++}`, r = STROKE * 0.6;
+        const ring = Array.from({ length: 8 }, (_, i) => [r * Math.cos(i * Math.PI / 4), r * Math.sin(i * Math.PI / 4)]);
+        const column = hull([B, top].flatMap(z => foot.map(p => T(p, z))).flatMap(([px, py]) => ring.map(([ox, oy]) => [px + ox, py + oy])));
+        const k = kt(0, s / BUILD, (s + 0.6) / BUILD, 1);
+        out.push(`<clipPath id="${id}"><path d="${rel('M' + column.map(pt).join('L') + 'Z')}"/></clipPath><g clip-path="url(#${id})"><g>` +
+          `<animateTransform attributeName="transform" type="translate" values="0 ${f(h * PX)};0 ${f(h * PX)};0 0;0 0" keyTimes="${k}" calcMode="spline" keySplines="0 0 1 1;0.22 0.9 0.32 1;0 0 1 1" dur="${BUILD}s"/>`);
         if (c === busiest) { // busiest day: lime dome in a well on top
           const well = circle(cx, cy, 11, 32);
-          prism(rrect(x - 3, y - 3, x + BLOCK + 3, y + BLOCK + 3, 8), B, h, P.white, { holes: [well] });
+          prism(foot, B, h, P.white, { holes: [well] });
           inside(well, top, () => { flat(well, top - 0.05, P.black); dome(cx, cy, top - 0.05, 9.5, P.lime); });
         } else {
-          prism(rrect(x, y, x + BLOCK, y + BLOCK, 7, 3), B, h, P.white, { top: c.count >= hot ? P.lime : P.white });
+          prism(foot, B, h, P.white, { top: c.count >= hot ? P.lime : P.white });
         }
-        out.push('</g>');
+        out.push('</g></g>');
+        baseInk(foot, B); // the base edge sits on the clip boundary; keep it crisp while the block rises
       });
     consoleUnit(q, w0, w1);
   }
