@@ -29,9 +29,13 @@ jobs:
         run: node .github/scripts/iso_contrib.mjs --user ${{ github.repository_owner }} --out profile-iso
       - name: Check the SVGs are well-formed XML (browsers reject them otherwise)
         run: python3 -c "import sys, xml.etree.ElementTree as ET; [ET.parse(f) for f in sys.argv[1:]]" profile-iso/*.svg
+      - name: Version the image URLs in the README so GitHub's image cache fetches the new files
+        run: |
+          v=$(cat profile-iso/iso-contrib-light.svg profile-iso/iso-contrib-dark.svg | sha256sum | cut -c1-10)
+          sed -i -E "s#(profile-iso/iso-contrib-(light|dark)\.svg)(\?v=[0-9a-f]+)?#\1?v=$v#g" README.md
       - name: Commit & Push
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add -A profile-iso
+          git add -A profile-iso README.md
           git diff --staged --quiet || (git commit -m "generated" && git push)
