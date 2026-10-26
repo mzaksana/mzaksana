@@ -27,6 +27,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node .github/scripts/iso_contrib.mjs --user ${{ github.repository_owner }} --out profile-iso
+      - name: Check the SVGs are well-formed XML (browsers reject them otherwise)
+        run: python3 -c "import sys, xml.etree.ElementTree as ET; [ET.parse(f) for f in sys.argv[1:]]" profile-iso/*.svg
       - name: Commit & Push
         run: |
           git config user.name github-actions
