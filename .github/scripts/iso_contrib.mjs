@@ -1,12 +1,15 @@
 // Renders the last year of GitHub contributions as an isometric line-art illustration,
 // in the style of the VELD landing wordmark: white extruded blocks with ink outlines,
 // lime accents, standing on rounded floor tiles over a flat ASCII lattice.
-//   GITHUB_TOKEN=... node iso_contrib.mjs --user mzaksana --out profile-3d-contrib
+//   GITHUB_TOKEN=... node iso_contrib.mjs --user mzaksana --out profile-iso [--readme README.md]
 //   node iso_contrib.mjs --data days.json --out dir      (days.json: [{date, count}, ...])
+// Files are named iso-contrib-<theme>-<content hash>.svg so every new render gets a new URL and
+// GitHub's image cache can never serve a stale copy; --readme rewrites the references to match.
 // Solids are extruded 2D shapes ("prisms") in blueprint units (y-down; 100 units = 1 height unit),
 // projected isometrically and emitted back to front. Per prism:
 //   side walls (two flat tones, one path each) -> side ink -> top face -> top ink.
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, unlinkSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 
 const args = Object.fromEntries(process.argv.slice(2).reduce((acc, a, i, all) =>
@@ -434,9 +437,17 @@ ${out.join('\n')}
 </svg>`;
 }
 
+const NAME = /iso-contrib-(light|dark)(-[0-9a-f]{8})?\.svg(\?v=[0-9a-f]+)?/g;
 mkdirSync(OUT, { recursive: true });
+for (const file of readdirSync(OUT)) if (/^iso-contrib-.*\.svg$/.test(file)) unlinkSync(join(OUT, file));
+const names = {};
 for (const theme of Object.keys(THEMES)) {
-  const file = join(OUT, `iso-contrib-${theme}.svg`);
-  writeFileSync(file, render(theme, `iso-${theme}`));
-  console.log(`wrote ${file}`);
+  const svg = render(theme, `iso-${theme}`);
+  names[theme] = `iso-contrib-${theme}-${createHash('sha256').update(svg).digest('hex').slice(0, 8)}.svg`;
+  writeFileSync(join(OUT, names[theme]), svg);
+  console.log(`wrote ${join(OUT, names[theme])}`);
+}
+if (args.readme) {
+  writeFileSync(args.readme, readFileSync(args.readme, 'utf8').replace(NAME, (_, theme) => names[theme]));
+  console.log(`updated ${args.readme}`);
 }
