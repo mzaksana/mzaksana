@@ -4,7 +4,8 @@
 //   GITHUB_TOKEN=... node iso_contrib.mjs --user mzaksana --out profile-iso [--readme README.md]
 //   node iso_contrib.mjs --data days.json --out dir      (days.json: [{date, count}, ...])
 // Files are named iso-contrib-<theme>-<content hash>.svg so every new render gets a new URL and
-// GitHub's image cache can never serve a stale copy; --readme rewrites the references to match.
+// GitHub's image cache can never serve a stale copy; --readme rewrites the references to match,
+// and latest.json lists the current names for anything else that embeds them (e.g. mzaksana.com).
 // Solids are extruded 2D shapes ("prisms") in blueprint units (y-down; 100 units = 1 height unit),
 // projected isometrically and emitted back to front. Per prism:
 //   side walls (two flat tones, one path each) -> side ink -> top face -> top ink.
@@ -481,6 +482,7 @@ for (const theme of Object.keys(THEMES)) {
   writeFileSync(join(OUT, names[theme]), svg);
   console.log(`wrote ${join(OUT, names[theme])}`);
 }
+writeFileSync(join(OUT, 'latest.json'), JSON.stringify(names, null, 2) + '\n');
 if (args.readme) {
   writeFileSync(args.readme, readFileSync(args.readme, 'utf8').replace(NAME, (_, theme) => names[theme]));
   console.log(`updated ${args.readme}`);
