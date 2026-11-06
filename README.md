@@ -1,6 +1,6 @@
 ### Hi there 👋
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/mzaksana/mzaksana/main/profile-iso/iso-contrib-dark-45ab0b36.svg" />
-  <img width="100%" alt="mzaksana's contributions over the last year, as an isometric illustration" src="https://raw.githubusercontent.com/mzaksana/mzaksana/main/profile-iso/iso-contrib-light-8b7864c1.svg" />
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/mzaksana/mzaksana/main/profile-iso/iso-contrib-dark-b3eb051b.svg" />
+  <img width="100%" alt="mzaksana's contributions over the last year, as an isometric illustration" src="https://raw.githubusercontent.com/mzaksana/mzaksana/main/profile-iso/iso-contrib-light-ce75314e.svg" />
 </picture>
